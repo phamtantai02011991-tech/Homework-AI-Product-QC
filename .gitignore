@@ -1,0 +1,36 @@
+# .NET / Visual Studio
+bin/
+obj/
+.vs/
+*.user
+*.suo
+appsettings.Development.json
+**/appsettings.Development.json
+appsettings.Local.json
+**/appsettings.Local.json
+*.secrets.json
+.secrets
+
+# SQL Server LocalDB / Database files
+*.mdf
+*.ldf
+
+# Node / Frontend
+node_modules/
+dist/
+.env
+.env.local
+
+# Internal agent development workspace & instructions (kept locally, excluded from repository)
+.agents/
+AGENT_INSTRUCTIONS.md
+
+# Uploaded inspection media (keep directory, ignore uploaded instances)
+backend/AIProductQC.API/wwwroot/uploads/*
+!backend/AIProductQC.API/wwwroot/uploads/.gitkeep
+
+# OS generated
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store

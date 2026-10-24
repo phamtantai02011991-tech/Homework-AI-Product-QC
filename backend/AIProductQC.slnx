@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="AIProductQC.API/AIProductQC.API.csproj" />
+  <Project Path="AIProductQC.Core/AIProductQC.Core.csproj" />
+  <Project Path="AIProductQC.Infrastructure/AIProductQC.Infrastructure.csproj" />
+  <Project Path="AIProductQC.Tests/AIProductQC.Tests.csproj" />
+</Solution>
