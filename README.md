@@ -70,7 +70,7 @@ Relationships use `DeleteBehavior.Restrict` to preserve audit compliance records
 
 ### 5.1 Clone & Navigate
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/phamtantai02011991-tech/Homework-AI-Product-QC.git
 cd Homework
 ```
 
@@ -200,3 +200,22 @@ dotnet test AIProductQC.Tests/AIProductQC.Tests.csproj
 - [docs/API-CONTRACT.md](file:///d:/GANA/Homework/docs/API-CONTRACT.md): Full REST API contracts with JSON schemas and status codes.
 - [docs/API-TESTING.md](file:///d:/GANA/Homework/docs/API-TESTING.md): cURL & PowerShell scripts for the 15 mandatory test scenarios.
 - [docs/IMPLEMENTATION-PLAN.md](file:///d:/GANA/Homework/docs/IMPLEMENTATION-PLAN.md): Full engineering roadmap and execution gates.
+
+---
+
+## 10. Known Limitations & Production Roadmap
+
+In accordance with course assignment requirements, the following architectural boundaries and intentional trade-offs are explicitly documented:
+
+1. **Authentication & Authorization (AuthN/AuthZ):**
+   - *Current State:* As an educational/academic prototype, the application operates in single-tenant mode without login credentials, using an inspector profile selection dropdown (`InspectorId`) for audit attribution.
+   - *Production Roadmap:* Integrate ASP.NET Core Identity with OAuth 2.0 / OpenID Connect (Azure Active Directory / Auth0) and Role-Based Access Control (RBAC: `QC_Operator`, `Shift_Supervisor`, `Plant_Manager`).
+2. **Single Camera Perspective:**
+   - *Current State:* Evaluates a single uploaded image per inspection report.
+   - *Production Roadmap:* Support multi-angle batch image ingestion (Top, Front, Side, 360° rotational rig) combined with unified defect fusion analysis.
+3. **Media Storage Infrastructure:**
+   - *Current State:* Stores inspection images on local disk storage in `wwwroot/uploads` with GUID sanitization and magic byte validation.
+   - *Production Roadmap:* Transition to cloud-native object storage (Azure Blob Storage / Amazon S3) with pre-signed URLs and CDN distribution.
+4. **Edge vs. Cloud AI Inference:**
+   - *Current State:* Invokes Google Gemini Vision cloud API over HTTPS.
+   - *Production Roadmap:* Deploy quantized on-premise vision models (e.g. YOLO / ONNX Runtime) on industrial edge devices (NVIDIA Jetson) for sub-50ms offline line-rate inspection.

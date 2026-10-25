@@ -195,7 +195,7 @@ Quy tắc phân loại (Classification Guidelines):
 ";
     }
 
-    private AiAnalysisResult ParseGeminiResponse(string responseBody)
+    internal AiAnalysisResult ParseGeminiResponse(string responseBody)
     {
         try
         {

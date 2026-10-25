@@ -85,7 +85,7 @@ public class ProductsController : ControllerBase
         var totalInspected = product.PassedStock + product.FailedStock;
         var passRate = totalInspected > 0
             ? Math.Round((double)product.PassedStock / totalInspected * 100.0, 1)
-            : 100.0;
+            : 0.0;
 
         var dto = new ProductDetailResponseDto(
             product.ProductId,

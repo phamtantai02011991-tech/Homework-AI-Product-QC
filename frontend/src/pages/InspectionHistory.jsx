@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Filter, Search, Calendar, RefreshCw, AlertCircle, 
-  ChevronLeft, ChevronRight, Eye 
+  ChevronLeft, ChevronRight, Eye, X
 } from 'lucide-react';
 import { inspectionService } from '../services/inspectionService';
 import { productService } from '../services/productService';
@@ -16,9 +16,14 @@ export default function InspectionHistory() {
   const [errorMessage, setErrorMessage] = useState('');
 
   // Filters
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedProductId, setSelectedProductId] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [isConfirmedFilter, setIsConfirmedFilter] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -37,9 +42,12 @@ export default function InspectionHistory() {
         pageSize: 10
       };
 
+      if (searchTerm.trim()) params.search = searchTerm.trim();
       if (selectedProductId) params.productId = selectedProductId;
       if (selectedStatus) params.status = selectedStatus;
       if (isConfirmedFilter !== '') params.isConfirmed = isConfirmedFilter === 'true';
+      if (startDate) params.startDate = `${startDate}T00:00:00Z`;
+      if (endDate) params.endDate = `${endDate}T23:59:59Z`;
 
       const data = await inspectionService.getInspections(params);
       setReports(data.items);
@@ -54,12 +62,21 @@ export default function InspectionHistory() {
 
   useEffect(() => {
     fetchReports();
-  }, [currentPage, selectedProductId, selectedStatus, isConfirmedFilter]);
+  }, [currentPage, selectedProductId, selectedStatus, isConfirmedFilter, startDate, endDate]);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    fetchReports();
+  };
 
   const handleResetFilters = () => {
+    setSearchTerm('');
     setSelectedProductId('');
     setSelectedStatus('');
     setIsConfirmedFilter('');
+    setStartDate('');
+    setEndDate('');
     setCurrentPage(1);
   };
 
@@ -72,7 +89,7 @@ export default function InspectionHistory() {
             Inspection History &amp; Audit Log
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-            Search and review all inspection records, inventory confirmation statuses, and defect classifications.
+            Search and review all inspection records, inventory confirmation statuses, defect classifications, and date ranges.
           </p>
         </div>
 
@@ -81,10 +98,29 @@ export default function InspectionHistory() {
         </button>
       </div>
 
-      {/* Filter Bar */}
-      <div className="glass-panel" style={{ padding: '20px', marginBottom: '24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', alignItems: 'flex-end' }}>
-          
+      {/* Filter Bar with Date Filters and Search */}
+      <div className="glass-panel" style={{ padding: '24px', marginBottom: '24px' }}>
+        {/* Search Row */}
+        <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+          <div style={{ position: 'relative', flex: 1 }}>
+            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }} />
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Search by product name, inspector, defect category, or diagnostic notes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ paddingLeft: '40px' }}
+            />
+          </div>
+          <button type="submit" className="btn btn-primary" style={{ padding: '10px 20px' }}>
+            Search
+          </button>
+        </form>
+
+        {/* Dropdowns & Date Pickers Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', alignItems: 'flex-end' }}>
+          {/* Product Filter */}
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label" style={{ fontSize: '0.8rem' }}>Product</label>
             <select
@@ -101,6 +137,7 @@ export default function InspectionHistory() {
             </select>
           </div>
 
+          {/* Status Filter */}
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label" style={{ fontSize: '0.8rem' }}>Quality Result</label>
             <select
@@ -115,6 +152,7 @@ export default function InspectionHistory() {
             </select>
           </div>
 
+          {/* Inventory Status */}
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label" style={{ fontSize: '0.8rem' }}>Inventory Status</label>
             <select
@@ -128,9 +166,38 @@ export default function InspectionHistory() {
             </select>
           </div>
 
+          {/* Date Filters (Item 8) */}
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label" style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Calendar size={13} color="var(--accent-cyan)" />
+              <span>From Date</span>
+            </label>
+            <input
+              type="date"
+              className="form-input"
+              value={startDate}
+              onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
+              style={{ fontSize: '0.85rem' }}
+            />
+          </div>
+
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label" style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Calendar size={13} color="var(--accent-cyan)" />
+              <span>To Date</span>
+            </label>
+            <input
+              type="date"
+              className="form-input"
+              value={endDate}
+              onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
+              style={{ fontSize: '0.85rem' }}
+            />
+          </div>
+
           <div>
             <button className="btn btn-secondary" onClick={handleResetFilters} style={{ width: '100%', padding: '12px' }}>
-              Clear Filters
+              Reset Filters
             </button>
           </div>
         </div>

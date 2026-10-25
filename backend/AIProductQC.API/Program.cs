@@ -22,9 +22,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // 2. Register Application Services & HttpClient
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+builder.Services.AddScoped<IInspectionService, InspectionService>();
 builder.Services.AddHttpClient<IGeminiVisionService, GeminiVisionService>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(60);
+});
+
+// Configure request multipart body length limit (10MB) to reject oversized uploads at pipeline level
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024;
 });
 
 // 3. Add Controllers with JSON Enum & Circular Reference handling

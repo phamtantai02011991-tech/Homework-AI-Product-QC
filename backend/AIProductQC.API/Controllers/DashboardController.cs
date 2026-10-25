@@ -39,20 +39,20 @@ public class DashboardController : ControllerBase
             .CountAsync(r => !r.IsUserConfirmed, cancellationToken);
 
         var totalPassed = await _context.InspectionReports
-            .CountAsync(r => r.QualityStatus == "Passed" && r.IsUserConfirmed, cancellationToken);
+            .CountAsync(r => r.QualityStatus == AIProductQC.Core.Enums.QualityStatusValues.Passed && r.IsUserConfirmed, cancellationToken);
 
         var totalFailed = await _context.InspectionReports
-            .CountAsync(r => r.QualityStatus == "Failed" && r.IsUserConfirmed, cancellationToken);
+            .CountAsync(r => r.QualityStatus == AIProductQC.Core.Enums.QualityStatusValues.Failed && r.IsUserConfirmed, cancellationToken);
 
         var confirmedCount = totalPassed + totalFailed;
         var passRate = confirmedCount > 0
             ? Math.Round((double)totalPassed / confirmedCount * 100.0, 1)
-            : 100.0;
+            : 0.0;
 
-        // Defect distribution for failed inspections
+        // Defect distribution for confirmed failed inspections (align with confirmed totalFailed metric)
         var defectStatsRaw = await _context.InspectionReports
             .AsNoTracking()
-            .Where(r => r.QualityStatus == "Failed" && r.DefectCategoryId != 1)
+            .Where(r => r.QualityStatus == AIProductQC.Core.Enums.QualityStatusValues.Failed && r.IsUserConfirmed && r.DefectCategoryId != 1)
             .GroupBy(r => r.DefectCategory!.CategoryName)
             .Select(g => new
             {

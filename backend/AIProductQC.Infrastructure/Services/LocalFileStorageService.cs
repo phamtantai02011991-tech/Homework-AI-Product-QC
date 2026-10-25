@@ -77,9 +77,17 @@ public class LocalFileStorageService : IFileStorageService
     }
 
     /// <inheritdoc />
+    /// <inheritdoc />
     public bool ValidateImage(Stream fileStream, string originalFileName, long fileLength, out string errorMessage)
     {
+        return ValidateImage(fileStream, originalFileName, fileLength, out _, out errorMessage);
+    }
+
+    /// <inheritdoc />
+    public bool ValidateImage(Stream fileStream, string originalFileName, long fileLength, out string detectedMimeType, out string errorMessage)
+    {
         errorMessage = string.Empty;
+        detectedMimeType = string.Empty;
 
         // 1. Check size limit
         if (fileLength <= 0)
@@ -104,18 +112,19 @@ public class LocalFileStorageService : IFileStorageService
 
         // 3. Check magic bytes (file signature verification)
         fileStream.Seek(0, SeekOrigin.Begin);
-        var headerBytes = new byte[12];
+        var headerBytes = new byte[16];
         var bytesRead = fileStream.Read(headerBytes, 0, headerBytes.Length);
-        fileStream.Seek(0, SeekOrigin.Begin); // Reset stream position
 
         if (bytesRead < 4)
         {
             errorMessage = "File header is corrupted or unreadable.";
+            fileStream.Seek(0, SeekOrigin.Begin);
             return false;
         }
 
-        var isJpeg = headerBytes[0] == 0xFF && headerBytes[1] == 0xD8 && headerBytes[2] == 0xFF;
-        var isPng = headerBytes[0] == 0x89 && headerBytes[1] == 0x50 && headerBytes[2] == 0x4E && headerBytes[3] == 0x47;
+        var isJpeg = bytesRead >= 3 && headerBytes[0] == 0xFF && headerBytes[1] == 0xD8 && headerBytes[2] == 0xFF;
+        var isPng = bytesRead >= 8 && headerBytes[0] == 0x89 && headerBytes[1] == 0x50 && headerBytes[2] == 0x4E && headerBytes[3] == 0x47 &&
+                    headerBytes[4] == 0x0D && headerBytes[5] == 0x0A && headerBytes[6] == 0x1A && headerBytes[7] == 0x0A;
         var isWebp = bytesRead >= 12 &&
                      headerBytes[0] == 0x52 && headerBytes[1] == 0x49 && headerBytes[2] == 0x46 && headerBytes[3] == 0x46 &&
                      headerBytes[8] == 0x57 && headerBytes[9] == 0x45 && headerBytes[10] == 0x42 && headerBytes[11] == 0x50;
@@ -123,9 +132,89 @@ public class LocalFileStorageService : IFileStorageService
         if (!isJpeg && !isPng && !isWebp)
         {
             errorMessage = "File content signature does not match a valid JPEG, PNG, or WEBP image.";
+            fileStream.Seek(0, SeekOrigin.Begin);
             return false;
         }
 
+        // 4. Structural Readability & Truncation Integrity Check
+        if (isJpeg)
+        {
+            detectedMimeType = "image/jpeg";
+            if (fileLength < 16)
+            {
+                errorMessage = "JPEG image payload is truncated or incomplete.";
+                fileStream.Seek(0, SeekOrigin.Begin);
+                return false;
+            }
+
+            // Check for valid JPEG End-of-Image (EOI) marker: 0xFF, 0xD9
+            if (fileStream.CanSeek && fileStream.Length >= 2)
+            {
+                fileStream.Seek(-2, SeekOrigin.End);
+                var eoiBytes = new byte[2];
+                var readEoi = fileStream.Read(eoiBytes, 0, 2);
+                fileStream.Seek(0, SeekOrigin.Begin);
+
+                if (readEoi < 2 || eoiBytes[0] != 0xFF || eoiBytes[1] != 0xD9)
+                {
+                    errorMessage = "JPEG image is corrupted, truncated, or missing End-of-Image (EOI) marker.";
+                    return false;
+                }
+            }
+        }
+        else if (isPng)
+        {
+            detectedMimeType = "image/png";
+            if (fileLength < 24)
+            {
+                errorMessage = "PNG image payload is truncated or incomplete.";
+                fileStream.Seek(0, SeekOrigin.Begin);
+                return false;
+            }
+
+            // Check for valid PNG End-of-File (IEND chunk: 49 45 4E 44)
+            if (fileStream.CanSeek && fileStream.Length >= 12)
+            {
+                fileStream.Seek(-12, SeekOrigin.End);
+                var endChunk = new byte[12];
+                var readEnd = fileStream.Read(endChunk, 0, 12);
+                fileStream.Seek(0, SeekOrigin.Begin);
+
+                var hasIend = readEnd >= 8 &&
+                              endChunk[0] == 0x49 && endChunk[1] == 0x45 && endChunk[2] == 0x4E && endChunk[3] == 0x44; // IEND
+                if (!hasIend)
+                {
+                    // Scan last 12 bytes in case of trailing CRC
+                    var found = false;
+                    for (int i = 0; i <= readEnd - 4; i++)
+                    {
+                        if (endChunk[i] == 0x49 && endChunk[i + 1] == 0x45 && endChunk[i + 2] == 0x4E && endChunk[i + 3] == 0x44)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        errorMessage = "PNG image is truncated, corrupted, or missing valid IEND footer chunk.";
+                        return false;
+                    }
+                }
+            }
+        }
+        else if (isWebp)
+        {
+            detectedMimeType = "image/webp";
+            if (fileLength < 32)
+            {
+                errorMessage = "WEBP image payload is truncated or incomplete.";
+                fileStream.Seek(0, SeekOrigin.Begin);
+                return false;
+            }
+        }
+
+        fileStream.Seek(0, SeekOrigin.Begin);
         return true;
     }
 }

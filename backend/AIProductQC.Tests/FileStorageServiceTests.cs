@@ -24,23 +24,69 @@ public class FileStorageServiceTests
     [Fact]
     public void ValidateImage_ValidJpeg_ReturnsTrue()
     {
-        // JPEG magic bytes: FF D8 FF E0
-        var stream = new MemoryStream(new byte[] { 0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01 });
-        var isValid = _storageService.ValidateImage(stream, "sample.jpg", stream.Length, out var error);
+        // JPEG magic bytes (FF D8 FF E0 ...) and EOI (FF D9)
+        var bytes = new byte[] { 
+            0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 
+            0x01, 0x01, 0x00, 0x60, 0x00, 0x60, 0x00, 0x00, 0xFF, 0xD9 
+        };
+        var stream = new MemoryStream(bytes);
+        var isValid = _storageService.ValidateImage(stream, "sample.jpg", stream.Length, out var detectedMime, out var error);
 
         Assert.True(isValid);
+        Assert.Equal("image/jpeg", detectedMime);
         Assert.Empty(error);
+    }
+
+    [Fact]
+    public void ValidateImage_TruncatedJpeg_MissingEoi_ReturnsFalse()
+    {
+        // JPEG header without closing FF D9
+        var bytes = new byte[] { 
+            0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 
+            0x01, 0x01, 0x00, 0x60, 0x00, 0x60, 0x00, 0x00 
+        };
+        var stream = new MemoryStream(bytes);
+        var isValid = _storageService.ValidateImage(stream, "truncated.jpg", stream.Length, out var error);
+
+        Assert.False(isValid);
+        Assert.Contains("missing End-of-Image", error);
     }
 
     [Fact]
     public void ValidateImage_ValidPng_ReturnsTrue()
     {
-        // PNG magic bytes: 89 50 4E 47
-        var stream = new MemoryStream(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D });
-        var isValid = _storageService.ValidateImage(stream, "test_defect.png", stream.Length, out var error);
+        // PNG magic bytes + chunks with closing IEND
+        var bytes = new byte[] { 
+            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 
+            0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, 
+            0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 
+            0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 
+            0x89, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 
+            0x44, 0xAE, 0x42, 0x60, 0x82 
+        };
+        var stream = new MemoryStream(bytes);
+        var isValid = _storageService.ValidateImage(stream, "test_defect.png", stream.Length, out var detectedMime, out var error);
 
         Assert.True(isValid);
+        Assert.Equal("image/png", detectedMime);
         Assert.Empty(error);
+    }
+
+    [Fact]
+    public void ValidateImage_TruncatedPng_MissingIend_ReturnsFalse()
+    {
+        // PNG header without IEND footer
+        var bytes = new byte[] { 
+            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 
+            0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, 
+            0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 
+            0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89 
+        };
+        var stream = new MemoryStream(bytes);
+        var isValid = _storageService.ValidateImage(stream, "truncated.png", stream.Length, out var error);
+
+        Assert.False(isValid);
+        Assert.Contains("missing valid IEND", error);
     }
 
     [Fact]

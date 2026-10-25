@@ -97,3 +97,12 @@ The `QualityStatus` column in `InspectionReport` can hold the following standard
 ### 4.3 UI/UX Standards
 - Consistent, modern design system: Tech-forward industrial aesthetics, clear visual indicators (green for Passed, red/amber for Failed, yellow for Needs Review).
 - Clear progress animations during AI analysis and comprehensive error banners on network or validation failures.
+
+---
+
+## 5. Known Limitations & Architectural Scope
+
+1. **Authentication & Authorization (AuthN/AuthZ):** Educational prototype runs in single-tenant mode without login credentials, using an inspector dropdown (`InspectorId`) for attribution. Production deployment requires OAuth2 / OIDC with RBAC.
+2. **Single Camera Inspection:** Ingests a single 2D image per report. Multi-angle 3D / 360° rotational rig inspection is reserved for future hardware integration.
+3. **Storage Tier:** Uses local disk file system (`wwwroot/uploads`) with magic byte validation and GUID paths. Production requires cloud object storage (Azure Blob / AWS S3) with pre-signed CDN URLs.
+4. **Cloud AI Inference Latency:** Invokes Google Gemini Vision cloud API over HTTPS. Production high-speed lines should use edge models (ONNX Runtime / TensorRT) for <50ms cycle times.

@@ -27,11 +27,23 @@ public interface IFileStorageService
     Task<byte[]> GetImageBytesAsync(string relativeUrl, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Validates image file extension, header signature (magic bytes), and size.
+    /// Validates image file extension, header signature (magic bytes), structural readability, and size.
     /// </summary>
     /// <param name="fileStream">Stream of the uploaded file.</param>
     /// <param name="originalFileName">Original file name.</param>
     /// <param name="fileLength">File size in bytes.</param>
+    /// <param name="errorMessage">Detailed validation error message if invalid.</param>
     /// <returns>True if the file is a valid image; otherwise false.</returns>
     bool ValidateImage(Stream fileStream, string originalFileName, long fileLength, out string errorMessage);
+
+    /// <summary>
+    /// Validates image file extension, header signature, structural integrity, and extracts canonical MIME type.
+    /// </summary>
+    /// <param name="fileStream">Stream of the uploaded file.</param>
+    /// <param name="originalFileName">Original file name.</param>
+    /// <param name="fileLength">File size in bytes.</param>
+    /// <param name="detectedMimeType">Canonical MIME type deduced from file signature.</param>
+    /// <param name="errorMessage">Detailed validation error message if invalid.</param>
+    /// <returns>True if the file is a valid, readable image; otherwise false.</returns>
+    bool ValidateImage(Stream fileStream, string originalFileName, long fileLength, out string detectedMimeType, out string errorMessage);
 }
