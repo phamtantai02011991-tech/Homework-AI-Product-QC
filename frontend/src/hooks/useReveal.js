@@ -13,6 +13,9 @@ export default function useReveal(deps = []) {
   useEffect(() => {
     const nodes = document.querySelectorAll('.ck-reveal:not(.is-visible)');
 
+    // Chỉ ẩn nội dung khi JS chắc chắn chạy được (xem .js-ready trong CSS).
+    document.documentElement.classList.add('js-ready');
+
     // Trình duyệt cũ hoặc môi trường không hỗ trợ: hiện luôn, không ẩn nội dung.
     if (typeof IntersectionObserver === 'undefined') {
       nodes.forEach((el) => el.classList.add('is-visible'));

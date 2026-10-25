@@ -26,7 +26,8 @@
   --ck-ink-soft: #5a544b;
 
   /* --- nhấn --- */
-  --ck-gold: #c9a97d;         /* tiêu đề thẻ, chữ nhấn */
+  --ck-gold: #c9a97d;         /* CHỈ trang trí: viền, icon (2.1:1 trên nền kem) */
+  --ck-gold-text: #8f6a34;    /* chữ màu vàng — 4.7:1, đạt AA */
   --ck-gold-strong: #b08341;
   --ck-line-light: rgba(247, 242, 232, 0.45);
   --ck-line-dark: rgba(63, 58, 51, 0.12);
@@ -128,6 +129,14 @@
   background: var(--ck-cream);
   border-color: var(--ck-cream);
   color: var(--ck-brown);
+}
+
+/* Bắt buộc theo đặc tả §4.2 — không bao giờ bỏ focus ring */
+.ck-btn-outline:focus-visible,
+.ck-nav a:focus-visible,
+.ck-arrow:focus-visible {
+  outline: 2px solid var(--ck-gold);
+  outline-offset: 3px;
 }
 
 /* ================= Hero + slider ================= */
@@ -255,7 +264,7 @@
   font-family: var(--ck-serif);
   font-weight: 500;
   font-size: clamp(1.6rem, 2.2vw, 2rem);
-  color: var(--ck-gold);
+  color: var(--ck-gold-text);
 }
 
 .ck-card p {
@@ -271,13 +280,14 @@
 
 /* ================= Hiệu ứng xuất hiện ================= */
 
-.ck-reveal {
+/* Hiện nội dung lần lượt — chỉ ẩn khi JS đã chạy (tránh trang trắng khi JS lỗi) */
+.js-ready .ck-reveal {
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.7s var(--ck-ease), transform 0.7s var(--ck-ease);
 }
 
-.ck-reveal.is-visible { opacity: 1; transform: none; }
+.js-ready .ck-reveal.is-visible { opacity: 1; transform: none; }
 
 /* đặt trên khối cha để các con hiện lần lượt */
 .ck-stagger > * { transition-delay: 0s; }

@@ -8,11 +8,14 @@ import { dashboardService } from '../services/dashboardService';
 import { STATIC_BASE_URL } from '../services/api';
 import StatCard from '../components/StatCard';
 import StatusBadge from '../components/StatusBadge';
+import useReveal from '../hooks/useReveal';
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  useReveal([data]);
 
   const fetchDashboard = async () => {
     try {
@@ -80,7 +83,7 @@ export default function Dashboard() {
       </div>
 
       {/* Summary KPI Cards Grid */}
-      <div className="stat-grid">
+      <div className="stat-grid ck-stagger">
         <StatCard
           title="Total Managed Products"
           value={data.totalProducts}
