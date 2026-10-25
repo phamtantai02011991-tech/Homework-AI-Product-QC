@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Award, ScanEye } from 'lucide-react';
+import { ScanEye } from 'lucide-react';
 
 export default function Navbar() {
   return (
@@ -9,11 +9,11 @@ export default function Navbar() {
         <div className="header-inner">
           <NavLink to="/" className="nav-brand">
             <div className="brand-crest">
-              <Award size={22} color="#caa472" />
+              <img src="/rajpham-logo.jpg" alt="Raj Pham Logo" className="brand-crest-img" />
             </div>
             <div>
               <div className="brand-title">AI PRODUCT QC</div>
-              <div className="brand-subtitle">ASSISTANT • GEMINI 3.5 FLASH</div>
+              <div className="brand-subtitle">BY RAJ PHAM • GEMINI 3.5 FLASH</div>
             </div>
           </NavLink>
 
