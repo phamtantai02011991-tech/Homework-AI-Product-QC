@@ -98,7 +98,7 @@ export default function InspectionDetail() {
               href={`${STATIC_BASE_URL}${report.imageUrl}`}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: 'var(--accent-cyan)', fontSize: '0.85rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+              style={{ color: 'var(--accent-gold-text)', fontSize: '0.85rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}
             >
               View original full-resolution image <ExternalLink size={14} />
             </a>

@@ -218,11 +218,11 @@ export default function UploadInspection() {
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
             >
-              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(6, 182, 212, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto', color: 'var(--accent-cyan)' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(202, 164, 114, 0.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto', color: 'var(--subbar-camel)' }}>
                 <UploadCloud size={28} />
               </div>
               <h3 style={{ fontSize: '1.05rem', fontWeight: 600, marginBottom: '6px' }}>
-                Drag &amp; drop image here, or <span style={{ color: 'var(--accent-cyan)' }}>Browse from computer</span>
+                Drag &amp; drop image here, or <span style={{ color: 'var(--accent-gold-text)' }}>Browse from computer</span>
               </h3>
               <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>
                 Ensure the image is sharp and well-lit so the AI can accurately identify scratches, fractures, or deformations.

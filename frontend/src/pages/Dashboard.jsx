@@ -88,40 +88,40 @@ export default function Dashboard() {
           title="Total Managed Products"
           value={data.totalProducts}
           icon={Package}
-          color="#38bdf8"
-          iconBg="rgba(56, 189, 248, 0.15)"
+          color="#3e2b17"
+          iconBg="rgba(202, 164, 114, 0.16)"
           meta="Product lines in catalog"
         />
         <StatCard
           title="Total Inspections"
           value={data.totalInspections}
           icon={ScanEye}
-          color="#818cf8"
-          iconBg="rgba(129, 140, 248, 0.15)"
+          color="#8f6a34"
+          iconBg="rgba(202, 164, 114, 0.16)"
           meta={`${data.totalConfirmed} confirmed / ${data.totalPendingConfirmation} pending`}
         />
         <StatCard
           title="Passed (Quality Approved)"
           value={data.totalPassed}
           icon={CheckCircle2}
-          color="#34d399"
-          iconBg="rgba(52, 211, 153, 0.15)"
+          color="var(--status-pass)"
+          iconBg="var(--status-pass-bg)"
           meta="Added to passed stock inventory"
         />
         <StatCard
           title="Failed (Defect Detected)"
           value={data.totalFailed}
           icon={XCircle}
-          color="#fb7185"
-          iconBg="rgba(251, 113, 133, 0.15)"
+          color="var(--status-fail)"
+          iconBg="var(--status-fail-bg)"
           meta="Isolated in quarantine stock"
         />
         <StatCard
           title="Pass Rate"
           value={`${data.passRate}%`}
           icon={TrendingUp}
-          color={data.passRate >= 90 ? '#34d399' : '#fbbf24'}
-          iconBg="rgba(251, 191, 36, 0.15)"
+          color={data.passRate >= 90 ? 'var(--status-pass)' : 'var(--status-review)'}
+          iconBg="rgba(202, 164, 114, 0.16)"
           meta="Based on confirmed inspection reports"
         />
       </div>
