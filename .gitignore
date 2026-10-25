@@ -24,6 +24,7 @@ dist/
 # Internal agent development workspace & instructions (kept locally, excluded from repository)
 .agents/
 AGENT_INSTRUCTIONS.md
+docs/DESIGN-SPEC.md
 
 # Uploaded inspection media (keep directory, ignore uploaded instances)
 backend/AIProductQC.API/wwwroot/uploads/*
