@@ -75,16 +75,16 @@ var app = builder.Build();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 // 7. Configure HTTP Request Pipeline
-if (app.Environment.IsDevelopment())
+// Enable Swagger UI (accessible at /swagger)
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "AI Product QC API v1");
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "AI Product QC API v1");
+    c.RoutePrefix = "swagger";
+});
 
-// Serve static files from wwwroot (for inspection images at /uploads/...)
+// Serve default file (index.html) and static files from wwwroot
+app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -94,5 +94,23 @@ app.UseCors("AllowFrontend");
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Single Page Application routing fallback: any non-file, non-API route serves index.html
+app.MapFallbackToFile("index.html");
+
+// 8. Auto-apply database migrations on startup (for seamless deployment on MonsterASP)
+try
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    if (dbContext.Database.IsRelational())
+    {
+        dbContext.Database.Migrate();
+    }
+}
+catch (Exception ex)
+{
+    app.Logger.LogWarning(ex, "Automatic database migration skipped or failed on startup. Please verify SQL connection string.");
+}
 
 app.Run();

@@ -18,6 +18,8 @@ appsettings.Local.json
 # Node / Frontend
 node_modules/
 dist/
+publish/
+*.zip
 .env
 .env.local
 
@@ -29,6 +31,13 @@ docs/DESIGN-SPEC.md
 # Uploaded inspection media (keep directory, ignore uploaded instances)
 backend/AIProductQC.API/wwwroot/uploads/*
 !backend/AIProductQC.API/wwwroot/uploads/.gitkeep
+
+# Built frontend assets copied to backend wwwroot for deployment
+backend/AIProductQC.API/wwwroot/assets/
+backend/AIProductQC.API/wwwroot/index.html*
+backend/AIProductQC.API/wwwroot/*.svg*
+backend/AIProductQC.API/wwwroot/logo.jpg
+backend/AIProductQC.API/wwwroot/rajpham-logo.jpg
 
 # OS generated
 Thumbs.db
