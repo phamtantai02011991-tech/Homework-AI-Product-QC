@@ -10,6 +10,14 @@ An enterprise-grade, educational full-stack web application designed for manufac
 
 ---
 
+## 🌟 Live Cloud Deployment & Endpoints
+- **Live Web Application:** [http://homework-gana.runasp.net](http://homework-gana.runasp.net)
+- **Interactive Swagger API Documentation:** [http://homework-gana.runasp.net/swagger](http://homework-gana.runasp.net/swagger)
+- **GitHub Repository:** [https://github.com/phamtantai02011991-tech/Homework-AI-Product-QC.git](https://github.com/phamtantai02011991-tech/Homework-AI-Product-QC.git)
+- **Cloud Hosting Platform:** MonsterASP.NET (.NET 10 Web API + React SPA in `wwwroot` + MSSQL Cloud Database)
+
+---
+
 ## 1. System Architecture & Tech Stack
 
 ```text
