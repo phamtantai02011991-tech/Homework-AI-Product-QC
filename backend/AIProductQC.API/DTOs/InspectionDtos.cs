@@ -10,8 +10,7 @@ public class AnalyzeInspectionRequestDto
     [Required(ErrorMessage = "ProductId is required.")]
     public int ProductId { get; set; }
 
-    [Required(ErrorMessage = "InspectorId is required.")]
-    public int InspectorId { get; set; }
+    public int? InspectorId { get; set; } = 1;
 
     [Required(ErrorMessage = "Image file is required.")]
     public IFormFile File { get; set; } = null!;

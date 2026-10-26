@@ -2,10 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   UploadCloud, AlertCircle, Sparkles, CheckCircle2, 
-  Image as ImageIcon, UserCheck, Package, RefreshCw, ShieldAlert 
+  Image as ImageIcon, UserCheck, Package, RotateCcw, ShieldAlert 
 } from 'lucide-react';
 import { productService } from '../services/productService';
-import { inspectorService } from '../services/inspectorService';
 import { inspectionService } from '../services/inspectionService';
 
 export default function UploadInspection() {
@@ -13,12 +12,10 @@ export default function UploadInspection() {
   const fileInputRef = useRef(null);
 
   const [products, setProducts] = useState([]);
-  const [inspectors, setInspectors] = useState([]);
   const [loadingInitial, setLoadingInitial] = useState(true);
 
   // Form states
   const [selectedProductId, setSelectedProductId] = useState('');
-  const [selectedInspectorId, setSelectedInspectorId] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
 
@@ -32,17 +29,13 @@ export default function UploadInspection() {
     async function loadData() {
       try {
         setLoadingInitial(true);
-        const [prodList, inspList] = await Promise.all([
-          productService.getProducts(),
-          inspectorService.getInspectors()
-        ]);
+        const prodList = await productService.getProducts();
         setProducts(prodList);
-        setInspectors(inspList);
-
-        if (prodList.length > 0) setSelectedProductId(prodList[0].productId);
-        if (inspList.length > 0) setSelectedInspectorId(inspList[0].inspectorId);
+        if (prodList.length > 0) {
+          setSelectedProductId(prodList[0].productId);
+        }
       } catch (err) {
-        setErrorMessage('Failed to load product catalog or inspectors list: ' + err.message);
+        setErrorMessage('Không thể tải danh sách sản phẩm: ' + err.message);
       } finally {
         setLoadingInitial(false);
       }
@@ -56,14 +49,14 @@ export default function UploadInspection() {
 
     // Validate size (10 MB limit)
     if (file.size > 10 * 1024 * 1024) {
-      setErrorMessage('File size exceeds the allowed limit (10MB).');
+      setErrorMessage('Dung lượng tệp vượt quá giới hạn cho phép (tối đa 10MB).');
       return;
     }
 
     // Validate format
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      setErrorMessage('Only valid image formats are accepted: JPG, PNG, WEBP.');
+      setErrorMessage('Chỉ chấp nhận các định dạng ảnh hợp lệ: JPG, PNG, WEBP.');
       return;
     }
 
@@ -85,17 +78,12 @@ export default function UploadInspection() {
     setErrorMessage('');
 
     if (!selectedProductId) {
-      setErrorMessage('Please select a product to inspect.');
-      return;
-    }
-
-    if (!selectedInspectorId) {
-      setErrorMessage('Please select the assigned QC inspector.');
+      setErrorMessage('Vui lòng chọn sản phẩm cần kiểm định.');
       return;
     }
 
     if (!selectedFile) {
-      setErrorMessage('Please upload a product image for inspection.');
+      setErrorMessage('Vui lòng tải lên ảnh chụp sản phẩm để AI kiểm tra.');
       return;
     }
 
@@ -105,7 +93,8 @@ export default function UploadInspection() {
 
       const formData = new FormData();
       formData.append('productId', selectedProductId);
-      formData.append('inspectorId', selectedInspectorId);
+      // Mặc định InspectorId = 1 đại diện cho Người dùng ứng dụng (QC Operator)
+      formData.append('inspectorId', '1');
       formData.append('file', selectedFile);
 
       const analysisResult = await inspectionService.analyzeInspection(formData, (progressEvent) => {
@@ -120,7 +109,7 @@ export default function UploadInspection() {
         state: { analysisResult }
       });
     } catch (err) {
-      setErrorMessage(err.message || 'Error uploading image to the AI analysis server.');
+      setErrorMessage(err.message || 'Lỗi khi gửi ảnh lên máy chủ phân tích AI.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -130,7 +119,7 @@ export default function UploadInspection() {
     return (
       <div style={{ textAlign: 'center', padding: '100px 0' }}>
         <div className="spinner" style={{ margin: '0 auto 16px auto', width: '36px', height: '36px' }}></div>
-        <p style={{ color: 'var(--text-muted)' }}>Loading inspection form...</p>
+        <p style={{ color: 'var(--text-muted)' }}>Đang tải danh mục sản phẩm...</p>
       </div>
     );
   }
@@ -139,10 +128,10 @@ export default function UploadInspection() {
     <div style={{ maxWidth: '840px', margin: '0 auto' }}>
       <div style={{ marginBottom: '28px' }}>
         <h1 style={{ fontSize: '1.8rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '8px' }}>
-          New Product Inspection (AI Defect Analysis)
+          Kiểm Tra Chất Lượng Sản Phẩm (AI Vision QC)
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-          Upload a clear product image. Google Gemini Vision AI will detect visible surface and structural defects in real time.
+          Tải ảnh chụp sản phẩm thực tế. Google Gemini AI sẽ phân tích bề mặt, cấu trúc và đưa ra nhận xét chi tiết.
         </p>
       </div>
 
@@ -154,12 +143,12 @@ export default function UploadInspection() {
       )}
 
       <form onSubmit={handleSubmit} className="glass-panel" style={{ padding: '32px' }}>
-        {/* Product & Inspector Selectors */}
+        {/* Product & Current QC Operator info */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '28px' }}>
           <div className="form-group">
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Package size={15} color="var(--accent-cyan)" />
-              <span>Product to Inspect *</span>
+              <span>Sản phẩm kiểm định *</span>
             </label>
             <select
               className="form-select"
@@ -169,7 +158,7 @@ export default function UploadInspection() {
             >
               {products.map((p) => (
                 <option key={p.productId} value={p.productId}>
-                  {p.productName} ({p.category}) — Stock: {p.totalStock} (Passed: {p.passedStock}, Failed: {p.failedStock})
+                  {p.productName} ({p.category}) — Tồn: {p.totalStock} (Đạt: {p.passedStock}, Lỗi: {p.failedStock})
                 </option>
               ))}
             </select>
@@ -178,20 +167,24 @@ export default function UploadInspection() {
           <div className="form-group">
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <UserCheck size={15} color="var(--accent-cyan)" />
-              <span>Assigned QC Inspector *</span>
+              <span>Người thực hiện kiểm định</span>
             </label>
-            <select
-              className="form-select"
-              value={selectedInspectorId}
-              onChange={(e) => setSelectedInspectorId(e.target.value)}
-              disabled={isAnalyzing}
-            >
-              {inspectors.map((i) => (
-                <option key={i.inspectorId} value={i.inspectorId}>
-                  {i.inspectorName} ({i.department})
-                </option>
-              ))}
-            </select>
+            <div style={{ 
+              padding: '11px 16px', 
+              background: 'rgba(255, 255, 255, 0.04)', 
+              border: '1px solid var(--border-color)', 
+              borderRadius: 'var(--radius-sm)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <span style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.9rem' }}>
+                Người dùng ứng dụng (QC Operator)
+              </span>
+              <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.15)', color: 'var(--accent-cyan)', fontWeight: 600 }}>
+                Trực tiếp
+              </span>
+            </div>
           </div>
         </div>
 
@@ -199,7 +192,7 @@ export default function UploadInspection() {
         <div className="form-group">
           <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <ImageIcon size={15} color="var(--accent-cyan)" />
-            <span>Product Image * (JPG, PNG, WEBP — Max 10MB)</span>
+            <span>Ảnh chụp sản phẩm * (JPG, PNG, WEBP — Tối đa 10MB)</span>
           </label>
 
           <input
@@ -222,10 +215,10 @@ export default function UploadInspection() {
                 <UploadCloud size={28} />
               </div>
               <h3 style={{ fontSize: '1.05rem', fontWeight: 600, marginBottom: '6px' }}>
-                Drag &amp; drop image here, or <span style={{ color: 'var(--accent-gold-text)' }}>Browse from computer</span>
+                Kéo thả ảnh vào đây, hoặc <span style={{ color: 'var(--accent-gold-text)' }}>Chọn từ máy tính</span>
               </h3>
               <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>
-                Ensure the image is sharp and well-lit so the AI can accurately identify scratches, fractures, or deformations.
+                Đảm bảo ảnh rõ nét và đủ sáng để Gemini Vision AI nhận diện chính xác các vết trầy xước, nứt vỡ hay móp méo.
               </p>
             </div>
           ) : (
@@ -233,7 +226,7 @@ export default function UploadInspection() {
               <div className="scanner-container" style={{ maxHeight: '380px', display: 'flex', justifyContent: 'center', background: '#000', borderRadius: 'var(--radius-md)' }}>
                 <img
                   src={previewUrl}
-                  alt="Inspection Preview"
+                  alt="Ảnh kiểm tra xem trước"
                   style={{ maxHeight: '380px', width: 'auto', objectFit: 'contain' }}
                 />
                 {isAnalyzing && <div className="scanner-laser" />}
@@ -242,15 +235,16 @@ export default function UploadInspection() {
               {!isAnalyzing && (
                 <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    Selected file: <strong>{selectedFile?.name}</strong> ({(selectedFile?.size / 1024).toFixed(1)} KB)
+                    Tệp đã chọn: <strong>{selectedFile?.name}</strong> ({(selectedFile?.size / 1024).toFixed(1)} KB)
                   </span>
                   <button
                     type="button"
                     className="btn btn-secondary"
                     onClick={() => { setSelectedFile(null); setPreviewUrl(''); }}
-                    style={{ padding: '6px 14px', fontSize: '0.82rem' }}
+                    style={{ padding: '6px 14px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px' }}
                   >
-                    Choose Different Image
+                    <RotateCcw size={14} />
+                    <span>Chọn ảnh khác</span>
                   </button>
                 </div>
               )}
@@ -262,7 +256,7 @@ export default function UploadInspection() {
         <div style={{ marginTop: '16px', padding: '12px 16px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <ShieldAlert size={16} color="var(--accent-cyan)" />
           <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            <strong>Inventory Safety Guarantee:</strong> This analysis phase only generates an unconfirmed draft report. <em>Product inventory is strictly unchanged</em> until explicitly confirmed in the next step.
+            <strong>Nguyên tắc an toàn kho:</strong> Bước phân tích AI chỉ tạo bản nháp kiểm định. <em>Tồn kho sản phẩm hoàn toàn chưa bị thay đổi</em> cho đến khi bạn xem và bấm đồng ý xác nhận.
           </span>
         </div>
 
@@ -272,7 +266,7 @@ export default function UploadInspection() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
               <div className="spinner" style={{ width: '18px', height: '18px' }} />
               <span style={{ fontWeight: 600, color: 'var(--accent-cyan)' }}>
-                Uploading image and analyzing defects via Google Gemini Vision AI...
+                Đang tải ảnh và phân tích khuyết tật bằng Google Gemini Vision AI...
               </span>
             </div>
             <div className="confidence-bar-bg" style={{ height: '6px' }}>
@@ -287,17 +281,17 @@ export default function UploadInspection() {
             type="submit"
             className="btn btn-primary"
             disabled={isAnalyzing || !selectedFile}
-            style={{ minWidth: '240px', padding: '14px 28px' }}
+            style={{ minWidth: '260px', padding: '14px 28px' }}
           >
             {isAnalyzing ? (
               <>
                 <div className="spinner" />
-                <span>Analyzing...</span>
+                <span>Đang phân tích...</span>
               </>
             ) : (
               <>
                 <Sparkles size={18} />
-                <span>Start AI Defect Analysis</span>
+                <span>Phân Tích Bằng AI (Gemini Vision)</span>
               </>
             )}
           </button>

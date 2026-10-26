@@ -124,10 +124,10 @@ export default function InspectionDetail() {
               </div>
 
               <div>
-                <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>QC Inspector:</span>
-                <strong>{report.inspector.inspectorName}</strong>
+                <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.8rem' }}>Người kiểm định:</span>
+                <strong>{report.inspector?.inspectorName || 'Người dùng ứng dụng'}</strong>
                 <span style={{ color: 'var(--text-dim)', display: 'block', fontSize: '0.82rem' }}>
-                  {report.inspector.department} ({report.inspector.email})
+                  QC Operator
                 </span>
               </div>
             </div>

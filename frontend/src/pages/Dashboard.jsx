@@ -173,7 +173,7 @@ export default function Dashboard() {
             </h2>
             <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
               <p style={{ marginBottom: '12px' }}>
-                🛡️ <strong>Zero Mutation Principle:</strong> The AI provides an objective diagnostic proposal. Factory inventory is <strong>strictly unchanged</strong> until a QC inspector reviews and explicitly clicks confirm.
+                🛡️ <strong>Bảo toàn tồn kho:</strong> Gemini AI đưa ra nhận xét chẩn đoán khách quan. Tồn kho sản phẩm <strong>hoàn toàn chưa thay đổi</strong> cho đến khi bạn xem và bấm đồng ý xác nhận.
               </p>
               <p style={{ marginBottom: '12px' }}>
                 ⚡ <strong>Atomic Transaction:</strong> Upon confirmation, report locking and stock adjustments are executed within a single <code>IDbContextTransaction</code>, preventing duplicates (HTTP 409) and guaranteeing 100% data consistency.
@@ -213,7 +213,7 @@ export default function Dashboard() {
                   <th>Report #</th>
                   <th>Image</th>
                   <th>Product</th>
-                  <th>QC Inspector</th>
+                  <th>Người kiểm định</th>
                   <th>Defect Category</th>
                   <th>AI Result</th>
                   <th>Confidence</th>

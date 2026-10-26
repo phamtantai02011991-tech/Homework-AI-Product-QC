@@ -238,7 +238,7 @@ export default function InspectionHistory() {
                   <th>Report #</th>
                   <th>Image</th>
                   <th>Product</th>
-                  <th>QC Inspector</th>
+                  <th>Người kiểm định</th>
                   <th>Defect Category</th>
                   <th>AI Result</th>
                   <th>Confidence</th>

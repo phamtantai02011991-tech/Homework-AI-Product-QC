@@ -164,9 +164,12 @@ public class InspectionsController : ControllerBase
         {
             using var fileStream = request.File.OpenReadStream();
 
+            var effectiveInspectorId = request.InspectorId.GetValueOrDefault(1);
+            if (effectiveInspectorId <= 0) effectiveInspectorId = 1;
+
             var (report, isFallback, warningMessage) = await _inspectionService.AnalyzeAndCreateDraftAsync(
                 request.ProductId,
-                request.InspectorId,
+                effectiveInspectorId,
                 fileStream,
                 request.File.FileName,
                 request.File.Length,
